@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "scia-tech-mobile-app",
+    "slug": "scia-tech-mobile-app",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "scia-tech-mobile-app"
+}
