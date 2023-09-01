@@ -16,15 +16,25 @@ const RegistrationScreen = () => {
   const navigation = useNavigation();
   const [isRegisterDialogVisible, setRegisterDialogVisible] = useState(false);
   const [isSignInDialogVisible, setSignInDialogVisible] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword1, setShowPassword1] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isEmailValid, setEmailValid] = useState(true);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isPasswordValid, setPasswordValid] = useState(true);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const togglePasswordVisibility1 = () => {
+    setShowPassword1(!showPassword1);
   };
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
+  const togglePasswordVisibility2 = () => {
+    setShowPassword2(!showPassword2);
+  };
+
+  const validateEmail = (inputEmail) => {
+    const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    return emailPattern.test(inputEmail);
   };
 
   const handleRegisterPress = () => {
@@ -33,6 +43,16 @@ const RegistrationScreen = () => {
 
   const handleSignInPress = () => {
     setSignInDialogVisible(true);
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setPasswordValid(text.length >= 8 && text === confirmPassword);
+  };
+
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    setPasswordValid(text.length >= 8 && text === password);
   };
 
   return (
@@ -53,19 +73,35 @@ const RegistrationScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Please enter a valid email address..."
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              setEmailValid(true);
+            }}
+            onBlur={() => {
+              setEmailValid(validateEmail(email));
+            }}
+            keyboardType="email-address"
           />
+          {!isEmailValid && (
+            <Text style={styles.errorText}>
+              Please enter a valid email address.
+            </Text>
+          )}
           <View style={styles.ViewPassword}>
             <TextInput
               style={styles.inputPassword}
               placeholder="Enter your password here..."
-              secureTextEntry={!showPassword}
+              secureTextEntry={!showPassword1}
+              value={password}
+              onChangeText={handlePasswordChange}
             />
             <Pressable
-              onPress={togglePasswordVisibility}
+              onPress={togglePasswordVisibility1}
               style={styles.eyeIcon1}
             >
               <Icon
-                name={showPassword ? "eye-slash" : "eye"}
+                name={showPassword1 ? "eye-slash" : "eye"}
                 size={20}
                 color="black"
               />
@@ -75,22 +111,59 @@ const RegistrationScreen = () => {
             <TextInput
               style={styles.inputPassword}
               placeholder="Confirm your password here..."
-              secureTextEntry={!showPassword}
+              secureTextEntry={!showPassword2}
+              value={confirmPassword}
+              onChangeText={handleConfirmPasswordChange}
             />
             <Pressable
-              onPress={togglePasswordVisibility}
-              style={styles.eyeIcon1}
+              onPress={togglePasswordVisibility2}
+              style={styles.eyeIcon2}
             >
               <Icon
-                name={showPassword ? "eye-slash" : "eye"}
+                name={showPassword2 ? "eye-slash" : "eye"}
                 size={20}
                 color="black"
               />
             </Pressable>
           </View>
+          {!isPasswordValid && (
+            <Text style={styles.errorText}>
+              Password must be at least 8 characters long and match the confirm
+              password.
+            </Text>
+          )}
           <Pressable
-            style={styles.registerButton}
-            onPress={() => navigation.replace("About")}
+            style={[
+              styles.registerButton,
+              (!isEmailValid ||
+                !isPasswordValid ||
+                email.length < 1 ||
+                password.length < 1 ||
+                confirmPassword.length < 1) && { opacity: 0.5 },
+            ]}
+            onPress={() => {
+              if (
+                isEmailValid &&
+                isPasswordValid &&
+                email.length >= 1 &&
+                password.length >= 1 &&
+                confirmPassword.length >= 1
+              ) {
+                navigation.replace("About");
+              } else {
+                setEmailValid(validateEmail(email));
+                setPasswordValid(
+                  password.length >= 8 && password === confirmPassword
+                );
+              }
+            }}
+            disabled={
+              !isEmailValid ||
+              !isPasswordValid ||
+              email.length < 1 ||
+              password.length < 1 ||
+              confirmPassword.length < 1
+            }
           >
             <Text style={styles.buttonText}>Register</Text>
           </Pressable>
@@ -211,6 +284,22 @@ const styles = StyleSheet.create({
     top: "37%",
     right: 0,
     transform: [{ translateY: -10 }],
+  },
+  eyeIcon2: {
+    marginTop: 6,
+    marginRight: 10,
+    position: "absolute",
+    top: "37%",
+    right: 0,
+    transform: [{ translateY: -10 }],
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 5,
+    marginBottom: 5,
+    paddingLeft: "10%",
+    paddingRight: "10%",
   },
 });
 

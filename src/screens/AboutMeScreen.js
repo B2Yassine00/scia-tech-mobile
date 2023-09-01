@@ -1,38 +1,66 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ImageBackground,
-  TextInput,
-  Pressable,
-  StyleSheet,
-} from "react-native";
-import { Dialog } from "react-native-popup-dialog";
-import image2 from "../../assets/placeholder.png";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 
-const RegistrationScreen = () => {
+const AboutMeScreen = () => {
   const navigation = useNavigation();
-  const [isRegisterDialogVisible, setRegisterDialogVisible] = useState(false);
-  const [isSignInDialogVisible, setSignInDialogVisible] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [firstName, setName] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedAge, setSelectedAge] = useState("");
+  const [isPickerVisible1, setIsPickerVisible1] = useState(false);
+  const [selectedWeight, setSelectedWeight] = useState("");
+  const [isPickerVisible2, setIsPickerVisible2] = useState(false);
+  const [selectedHeight, setSelectedHeight] = useState("");
+  const [isPickerVisible3, setIsPickerVisible3] = useState(false);
+  const [sleepTime1, setSleepTime1] = useState("No");
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const isFormValidNext = () => {
+    return (
+      firstName && selectedAge && selectedWeight && selectedHeight && sleepTime1
+    );
   };
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
+  const handleNextPress = () => {
+    if (
+      !firstName ||
+      !selectedAge ||
+      !selectedWeight ||
+      !selectedHeight ||
+      !sleepTime1
+    ) {
+      setErrorMessage("Please fill in all the fields.");
+      return;
+    }
+    navigation.replace("MedicalReport");
   };
 
-  const handleRegisterPress = () => {
-    setRegisterDialogVisible(true);
+  const handleAgeChange = (age) => {
+    setSelectedAge(age);
+    setIsPickerVisible1(false);
+    setIsFormValid(age >= 8 && age <= 100);
   };
 
-  const handleSignInPress = () => {
-    setSignInDialogVisible(true);
+  const handleWeightChange = (weight) => {
+    setSelectedWeight(weight);
+    setIsPickerVisible2(false);
   };
+
+  const weightOptions = Array.from({ length: 181 }, (_, index) => ({
+    label: `${index + 20} kg`,
+    value: index + 20,
+  }));
+
+  const handleHeightChange = (height) => {
+    setSelectedHeight(height);
+    setIsPickerVisible3(false);
+  };
+
+  const heightOptions = Array.from({ length: 121 }, (_, index) => ({
+    label: `${index + 100} cm`,
+    value: index + 100,
+  }));
 
   return (
     <View style={styles.container}>
@@ -43,32 +71,110 @@ const RegistrationScreen = () => {
             Please enter your full name, as well as your email address.
           </Text>
         </View>
-        <TextInput style={styles.input} placeholder="First Name" />
-        <TextInput style={styles.input} placeholder="Last Name" />
-        <TextInput style={styles.input} placeholder="Phone Number" />
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          onChangeText={(text) => {
+            setName(text);
+            setIsFormValid(!!text);
+          }}
+        />
+        <TextInput
+          style={styles.input}
+          value={selectedAge.toString()}
+          placeholder="Age"
+          onChangeText={(text) => setSelectedAge(parseInt(text))}
+          onFocus={() => setIsPickerVisible1(true)}
+          onBlur={() => setIsPickerVisible1(false)}
+        />
+        {isPickerVisible1 && (
+          <Picker selectedValue={selectedAge} onValueChange={handleAgeChange}>
+            {Array.from({ length: 93 }, (_, index) => (
+              <Picker.Item
+                label={(index + 8).toString()}
+                value={index + 8}
+                key={index}
+              />
+            ))}
+          </Picker>
+        )}
+        <TextInput
+          style={styles.input}
+          value={`${selectedWeight.toString()}`}
+          placeholder="Weight"
+          onChangeText={(text) => setSelectedWeight(parseInt(text))}
+          onFocus={() => setIsPickerVisible2(true)}
+          onBlur={() => setIsPickerVisible2(false)}
+        />
+        {isPickerVisible2 && (
+          <Picker
+            selectedValue={selectedWeight}
+            onValueChange={handleWeightChange}
+          >
+            {weightOptions.map((option) => (
+              <Picker.Item
+                label={`${option.label}`}
+                value={option.value}
+                key={option.value}
+              />
+            ))}
+          </Picker>
+        )}
+        <TextInput
+          style={styles.input}
+          value={`${selectedHeight.toString()}`}
+          placeholder="Height"
+          onChangeText={(text) => setSelectedHeight(parseInt(text))}
+          onFocus={() => setIsPickerVisible3(true)}
+          onBlur={() => setIsPickerVisible3(false)}
+        />
+        {isPickerVisible3 && (
+          <Picker
+            selectedValue={selectedHeight}
+            onValueChange={handleHeightChange}
+          >
+            {heightOptions.map((option) => (
+              <Picker.Item
+                label={option.label}
+                value={option.value}
+                key={option.value}
+              />
+            ))}
+          </Picker>
+        )}
+        <View style={styles.booleanContainer}>
+          <View style={styles.booleanOptions}>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                sleepTime1 === "Yes" && styles.selectedButton,
+              ]}
+              onPress={() => setSleepTime1("Yes")}
+            >
+              <Text style={styles.buttonText}>Male</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                sleepTime1 === "No" && styles.selectedButton,
+              ]}
+              onPress={() => setSleepTime1("No")}
+            >
+              <Text style={styles.buttonText}>Female</Text>
+            </Pressable>
+          </View>
+        </View>
         <Pressable
-          style={styles.registerButton}
-          onPress={() => navigation.replace("MedicalReport")}
+          style={[
+            styles.registerButton,
+            { opacity: isFormValidNext() ? 1 : 0.5 },
+          ]}
+          onPress={handleNextPress}
+          disabled={!isFormValidNext()}
         >
           <Text style={styles.buttonText}>Next</Text>
         </Pressable>
       </View>
-      <Dialog
-        visible={isRegisterDialogVisible}
-        onTouchOutside={() => setRegisterDialogVisible(false)}
-      >
-        <View style={styles.pressed}>
-          <Text>Login Button pressed</Text>
-        </View>
-      </Dialog>
-      <Dialog
-        visible={isSignInDialogVisible}
-        onTouchOutside={() => setSignInDialogVisible(false)}
-      >
-        <View style={styles.pressed}>
-          <Text>Register Button pressed</Text>
-        </View>
-      </Dialog>
     </View>
   );
 };
@@ -82,19 +188,9 @@ const styles = StyleSheet.create({
     paddingTop: "10%",
     margin: 0,
   },
-  centeredView: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: 280,
-    width: 400,
-  },
   bottomContainer: {
     flex: 1,
     justifyContent: "flex-start",
-  },
-  imageBackground: {
-    flex: 1,
-    alignItems: "start",
   },
   textContainer: {
     justifyContent: "flex-start",
@@ -119,9 +215,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderRadius: 20,
   },
-  pressed: {
-    padding: 10,
+  errorMessage: {
+    color: "red",
     fontSize: 14,
+    marginBottom: 6,
   },
   registerButton: {
     backgroundColor: "#05668D",
@@ -142,6 +239,33 @@ const styles = StyleSheet.create({
     paddingEnd: 30,
     paddingBottom: 15,
   },
+  booleanContainer: {
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  booleanText: {
+    fontSize: 16,
+    marginBottom: 6,
+    fontStyle: "italic",
+  },
+  booleanOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  booleanButton: {
+    flex: 1,
+    backgroundColor: "#d3d3d3",
+    borderRadius: 20,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  selectedButton: {
+    backgroundColor: "#000",
+    marginLeft: 5,
+    marginRight: 5,
+  },
 });
 
-export default RegistrationScreen;
+export default AboutMeScreen;

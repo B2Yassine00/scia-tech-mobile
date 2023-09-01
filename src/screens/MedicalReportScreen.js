@@ -1,92 +1,113 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ImageBackground,
-  TextInput,
-  Pressable,
-  StyleSheet,
-} from "react-native";
-import { Dialog } from "react-native-popup-dialog";
-import image2 from "../../assets/placeholder.png";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-const RegistrationScreen = () => {
+const MedicalReportScreen = () => {
   const navigation = useNavigation();
-  const [isRegisterDialogVisible, setRegisterDialogVisible] = useState(false);
-  const [isSignInDialogVisible, setSignInDialogVisible] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [medication, setMedication] = useState("No");
+  const [sleepTime1, setSleepTime1] = useState("No");
+  const [sleepTime2, setSleepTime2] = useState("No");
+  const [sleepTime3, setSleepTime3] = useState("No");
+  const [sleepTime4, setSleepTime4] = useState("No");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const handleNextPress = () => {
+    navigation.replace("SucessRegistration");
   };
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
-  const handleRegisterPress = () => {
-    setRegisterDialogVisible(true);
-  };
-
-  const handleSignInPress = () => {
-    setSignInDialogVisible(true);
-  };
+  const isFormValid =
+    medication && sleepTime1 && sleepTime2 && sleepTime3 && sleepTime4;
 
   return (
     <View style={styles.container}>
       <View style={styles.bottomContainer}>
         <View style={styles.textContainer}>
           <Text style={styles.headerText}>Medical Report</Text>
-          <Text style={styles.SubtitleText}>
+          <Text style={styles.subtitleText}>
             Please help us generate a general report to help us determine what
             works for you.
           </Text>
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="Do you currently take any medication ?"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="What is your usual sleep time?"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="What is your usual sleep time?"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="What is your usual sleep time?"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="What is your usual sleep time?"
-        />
+        <View style={styles.booleanContainer}>
+          <Text style={styles.booleanText}>
+            Do you currently take any medication?
+          </Text>
+          <View style={styles.booleanOptions}>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                medication === "Yes" && styles.selectedButton,
+              ]}
+              onPress={() => setMedication("Yes")}
+            >
+              <Text style={styles.buttonText}>Yes</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                medication === "No" && styles.selectedButton,
+              ]}
+              onPress={() => setMedication("No")}
+            >
+              <Text style={styles.buttonText}>No</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                medication === "Sometimes" && styles.selectedButton,
+              ]}
+              onPress={() => setMedication("Sometimes")}
+            >
+              <Text style={styles.buttonText}>Sometimes</Text>
+            </Pressable>
+          </View>
+        </View>
+        {/* Repeat the above pattern for other boolean fields */}
+        <View style={styles.booleanContainer}>
+          <Text style={styles.booleanText}>
+            Do you have a usual sleep time?
+          </Text>
+          <View style={styles.booleanOptions}>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                sleepTime1 === "Yes" && styles.selectedButton,
+              ]}
+              onPress={() => setSleepTime1("Yes")}
+            >
+              <Text style={styles.buttonText}>Yes</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                sleepTime1 === "No" && styles.selectedButton,
+              ]}
+              onPress={() => setSleepTime1("No")}
+            >
+              <Text style={styles.buttonText}>No</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.booleanButton,
+                sleepTime1 === "Sometimes" && styles.selectedButton,
+              ]}
+              onPress={() => setSleepTime1("Sometimes")}
+            >
+              <Text style={styles.buttonText}>Sometimes</Text>
+            </Pressable>
+          </View>
+        </View>
+        {errorMessage !== "" && (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        )}
         <Pressable
-          style={styles.registerButton}
-          onPress={() => navigation.replace("SucessRegistration")}
+          style={[styles.registerButton, { opacity: isFormValid ? 1 : 0.5 }]}
+          onPress={handleNextPress}
+          disabled={!isFormValid}
         >
           <Text style={styles.buttonText}>Next</Text>
         </Pressable>
       </View>
-      <Dialog
-        visible={isRegisterDialogVisible}
-        onTouchOutside={() => setRegisterDialogVisible(false)}
-      >
-        <View style={styles.pressed}>
-          <Text>Login Button pressed</Text>
-        </View>
-      </Dialog>
-      <Dialog
-        visible={isSignInDialogVisible}
-        onTouchOutside={() => setSignInDialogVisible(false)}
-      >
-        <View style={styles.pressed}>
-          <Text>Register Button pressed</Text>
-        </View>
-      </Dialog>
     </View>
   );
 };
@@ -100,19 +121,9 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     paddingTop: "10%",
   },
-  centeredView: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: 280,
-    width: 400,
-  },
   bottomContainer: {
     flex: 1,
     justifyContent: "flex-start",
-  },
-  imageBackground: {
-    flex: 1,
-    alignItems: "start",
   },
   textContainer: {
     justifyContent: "flex-start",
@@ -126,19 +137,36 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     paddingBottom: 10,
   },
-  input: {
-    marginTop: 6,
-    marginBottom: 6,
-    height: 40,
-    width: "100%",
-    backgroundColor: "#F2F2F2",
-    padding: 12,
-    fontSize: 14,
-    borderRadius: 20,
+  subtitleText: {
+    fontSize: 16,
+    paddingEnd: 30,
+    paddingBottom: 15,
   },
-  pressed: {
-    padding: 10,
-    fontSize: 14,
+  booleanContainer: {
+    marginBottom: 10,
+  },
+  booleanText: {
+    fontSize: 16,
+    marginBottom: 6,
+    fontStyle: "italic",
+  },
+  booleanOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  booleanButton: {
+    flex: 1,
+    backgroundColor: "#d3d3d3",
+    borderRadius: 20,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  selectedButton: {
+    backgroundColor: "#000",
+    marginLeft: 5,
+    marginRight: 5,
   },
   registerButton: {
     backgroundColor: "#05668D",
@@ -151,14 +179,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 15,
     textAlign: "center",
   },
-  SubtitleText: {
-    fontSize: 16,
-    paddingEnd: 30,
-    paddingBottom: 15,
+  errorMessage: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 5,
+    marginBottom: 5,
   },
 });
 
-export default RegistrationScreen;
+export default MedicalReportScreen;
