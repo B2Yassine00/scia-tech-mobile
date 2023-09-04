@@ -11,6 +11,9 @@ import HomeScreen from "./src/screens/HomeScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import ReportScreen from "./src/screens/ReportScreen";
 import NotificationScreen from "./src/screens/NotificationScreen";
+import ReportDailyScreen from "./src/screens/ReportDailyScreen";
+import ReportWeeklyScreen from "./src/screens/ReportWeeklyScreen";
+import ReportHistoryScreen from "./src/screens/ReportHistoryScreen";
 
 const Stack = createStackNavigator();
 
@@ -34,6 +37,9 @@ const AppNavigator = () => {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Report" component={ReportScreen} />
         <Stack.Screen name="Notification" component={NotificationScreen} />
+        <Stack.Screen name="Daily" component={ReportDailyScreen} />
+        <Stack.Screen name="Weekly" component={ReportWeeklyScreen} />
+        <Stack.Screen name="History" component={ReportHistoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
