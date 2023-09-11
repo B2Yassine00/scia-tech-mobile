@@ -7,29 +7,25 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
+import axios from "axios";
 import { Dialog } from "react-native-popup-dialog";
 import Icon from "react-native-vector-icons/FontAwesome";
 import image2 from "../../assets/placeholder.png";
 import { useNavigation } from "@react-navigation/native";
+import { Alert } from "react-native";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [isRegisterDialogVisible, setRegisterDialogVisible] = useState(false);
   const [isSignInDialogVisible, setSignInDialogVisible] = useState(false);
   const [showPassword1, setShowPassword1] = useState(false);
-  const [showPassword2, setShowPassword2] = useState(false);
   const [email, setEmail] = useState("");
   const [isEmailValid, setEmailValid] = useState(true);
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordValid, setPasswordValid] = useState(true);
 
   const togglePasswordVisibility1 = () => {
     setShowPassword1(!showPassword1);
-  };
-
-  const togglePasswordVisibility2 = () => {
-    setShowPassword2(!showPassword2);
   };
 
   const validateEmail = (inputEmail) => {
@@ -37,22 +33,43 @@ const LoginScreen = () => {
     return emailPattern.test(inputEmail);
   };
 
-  const handleRegisterPress = () => {
-    setRegisterDialogVisible(true);
-  };
-
-  const handleSignInPress = () => {
-    setSignInDialogVisible(true);
-  };
-
   const handlePasswordChange = (text) => {
     setPassword(text);
-    setPasswordValid(text.length >= 8 && text === confirmPassword);
+    setPasswordValid(text.length >= 8);
   };
 
-  const handleConfirmPasswordChange = (text) => {
-    setConfirmPassword(text);
-    setPasswordValid(text.length >= 8 && text === password);
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/login", {
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        // Redirect to the home screen or perform other actions
+        navigation.replace("Home", { email, password });
+      } else {
+        // Handle authentication errors
+        Alert.alert(
+          "Authentication Failed",
+          "Invalid email or password. Please try again."
+        );
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        // Handle authentication errors
+        Alert.alert(
+          "Authentication Failed",
+          "Invalid email or password. Please try again."
+        );
+      } else {
+        // Handle network errors
+        Alert.alert(
+          "Network Error",
+          "An error occurred while connecting to the server. Please check your network connection and try again."
+        );
+      }
+    }
   };
 
   return (
@@ -109,8 +126,7 @@ const LoginScreen = () => {
           </View>
           {!isPasswordValid && (
             <Text style={styles.errorText}>
-              Password must be at least 8 characters long and match the confirm
-              password.
+              Password must be at least 8 characters long
             </Text>
           )}
           <Pressable
@@ -119,31 +135,14 @@ const LoginScreen = () => {
               (!isEmailValid ||
                 !isPasswordValid ||
                 email.length < 1 ||
-                password.length < 1 ||
-                confirmPassword.length < 1) && { opacity: 0.5 },
+                password.length < 1) && { opacity: 0.5 },
             ]}
-            onPress={() => {
-              if (
-                isEmailValid &&
-                isPasswordValid &&
-                email.length >= 1 &&
-                password.length >= 1 &&
-                confirmPassword.length >= 1
-              ) {
-                navigation.replace("About");
-              } else {
-                setEmailValid(validateEmail(email));
-                setPasswordValid(
-                  password.length >= 8 && password === confirmPassword
-                );
-              }
-            }}
+            onPress={handleLogin}
             disabled={
               !isEmailValid ||
               !isPasswordValid ||
               email.length < 1 ||
-              password.length < 1 ||
-              confirmPassword.length < 1
+              password.length < 1
             }
           >
             <Text style={styles.buttonText}>Login</Text>
@@ -262,14 +261,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   eyeIcon1: {
-    marginTop: 6,
-    marginRight: 10,
-    position: "absolute",
-    top: "37%",
-    right: 0,
-    transform: [{ translateY: -10 }],
-  },
-  eyeIcon2: {
     marginTop: 6,
     marginRight: 10,
     position: "absolute",

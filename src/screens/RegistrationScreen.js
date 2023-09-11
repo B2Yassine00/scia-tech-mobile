@@ -11,6 +11,8 @@ import { Dialog } from "react-native-popup-dialog";
 import Icon from "react-native-vector-icons/FontAwesome";
 import image2 from "../../assets/placeholder.png";
 import { useNavigation } from "@react-navigation/native";
+import { Alert } from "react-native";
+import axios from "axios";
 
 const RegistrationScreen = () => {
   const navigation = useNavigation();
@@ -22,7 +24,7 @@ const RegistrationScreen = () => {
   const [isEmailValid, setEmailValid] = useState(true);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordValid, setPasswordValid] = useState(true);
+  const [isPasswordValid, setPasswordValid] = useState(false);
 
   const togglePasswordVisibility1 = () => {
     setShowPassword1(!showPassword1);
@@ -37,27 +39,87 @@ const RegistrationScreen = () => {
     return emailPattern.test(inputEmail);
   };
 
-  const handleRegisterPress = () => {
-    setRegisterDialogVisible(true);
-  };
-
-  const handleSignInPress = () => {
-    setSignInDialogVisible(true);
-  };
-
   const handlePasswordChange = (text) => {
     setPassword(text);
-    setPasswordValid(text.length >= 8 && text === confirmPassword);
+
+    // Define regular expressions for each password requirement
+    const lengthRegex = /.{8,}/;
+    const numberRegex = /\d/;
+    const specialCharRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/;
+    const uppercaseRegex = /[A-Z]/;
+    const lowercaseRegex = /[a-z]/;
+
+    const isLengthValid = lengthRegex.test(text);
+    const hasNumber = numberRegex.test(text);
+    const hasSpecialChar = specialCharRegex.test(text);
+    const hasUppercase = uppercaseRegex.test(text);
+    const hasLowercase = lowercaseRegex.test(text);
+
+    setPasswordValid(
+      isLengthValid &&
+        hasNumber &&
+        hasSpecialChar &&
+        hasUppercase &&
+        hasLowercase
+    );
   };
 
   const handleConfirmPasswordChange = (text) => {
-    setConfirmPassword(text);
-    setPasswordValid(text.length >= 8 && text === password);
+    const isPasswordMatching = text === password;
+    setConfirmPassword(
+      isPasswordMatching &&
+        password.length >= 8 &&
+        /\d/.test(password) &&
+        /.{8,}/.test(password) &&
+        /\d/.test(password) &&
+        /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/.test(password) &&
+        /[A-Z]/.test(password) &&
+        /[a-z]/.test(password)
+    );
+  };
+
+  const handleRegistration = async () => {
+    if (!isEmailValid || !isPasswordValid) {
+      Alert.alert("Invalid Input", "Please check your email and password.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:3000/register", {
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        // Registration successful, you can navigate to a success screen or log in the user
+        navigation.replace("About");
+      } else {
+        // Handle authentication errors
+        Alert.alert(
+          "Registration Failed",
+          "Failed to register. Please try again."
+        );
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        // Handle authentication errors
+        Alert.alert(
+          "Registration Failed",
+          "Failed to register. Please try again."
+        );
+      } else {
+        // Handle network errors
+        Alert.alert(
+          "Network Error",
+          "An error occurred while connecting to the server. Please check your network connection and try again."
+        );
+      }
+    }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.centeredView}>{/* Empty view with styling */}</View>
+      <View style={styles.centeredView}></View>
       <View style={styles.bottomContainer}>
         <ImageBackground
           source={image2}
@@ -126,44 +188,22 @@ const RegistrationScreen = () => {
               />
             </Pressable>
           </View>
-          {!isPasswordValid && (
+          {(!isPasswordValid || !confirmPassword) && password.length > 0 && (
             <Text style={styles.errorText}>
-              Password must be at least 8 characters long and match the confirm
-              password.
+              Password must be at least 8 characters long and contain at least 1
+              number, 1 special character, 1 uppercase letter, and 1 lowercase
+              letter.
             </Text>
           )}
           <Pressable
             style={[
               styles.registerButton,
-              (!isEmailValid ||
-                !isPasswordValid ||
-                email.length < 1 ||
-                password.length < 1 ||
-                confirmPassword.length < 1) && { opacity: 0.5 },
+              (!isEmailValid || !isPasswordValid || !confirmPassword) && {
+                opacity: 0.5,
+              },
             ]}
-            onPress={() => {
-              if (
-                isEmailValid &&
-                isPasswordValid &&
-                email.length >= 1 &&
-                password.length >= 1 &&
-                confirmPassword.length >= 1
-              ) {
-                navigation.replace("About");
-              } else {
-                setEmailValid(validateEmail(email));
-                setPasswordValid(
-                  password.length >= 8 && password === confirmPassword
-                );
-              }
-            }}
-            disabled={
-              !isEmailValid ||
-              !isPasswordValid ||
-              email.length < 1 ||
-              password.length < 1 ||
-              confirmPassword.length < 1
-            }
+            onPress={handleRegistration} // Call handleRegistration when the button is pressed
+            disabled={!isEmailValid || !isPasswordValid || !confirmPassword}
           >
             <Text style={styles.buttonText}>Register</Text>
           </Pressable>

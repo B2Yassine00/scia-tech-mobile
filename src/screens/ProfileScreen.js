@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,35 +10,94 @@ import {
 import home from "../images/Home.png";
 import profil from "../images/Profil.png";
 import report from "../images/Report.png";
-import { useNavigation } from "@react-navigation/native";
-
-const headerImage = require("../images/me.jpg");
-const logout = require("../images/logout.png");
+import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 const notification = require("../images/Notification.png");
+const headerImage = require("../images/profilPic.png");
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [selectedIcon, setSelectedIcon] = useState("profil");
+  const [userInfo, setUserInfo] = useState({
+    fullName: "",
+    height: "",
+    weight: "",
+    age: "",
+  });
 
   const handleIconPress = (icon) => {
     setSelectedIcon(icon);
   };
 
-  const Header = () => (
-    <View style={styles.header}>
-      <ImageContainer image={headerImage} />
-      <HeaderTitle />
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <ImageContainer image={logout} height={"70%"} width={"70%"} />
-      </TouchableOpacity>
-    </View>
-  );
+  // Use useFocusEffect to fetch user information when the screen is focused
+  useFocusEffect(() => {
+    fetchUserInfo();
+  });
+
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/info", {
+        method: "GET",
+        headers: {},
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserInfo(data);
+      } else {
+        console.error("Failed to fetch user information");
+      }
+    } catch (error) {
+      console.error("Error fetching user information:", error);
+    }
+  };
+
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.screen}>
-        <Header />
+      <Image source={headerImage} style={styles.headerImage} />
+      <Text style={styles.nameText}>{userInfo.fullName}</Text>
+      <Text style={styles.dateText}>{currentDate}</Text>
+      <View style={styles.cardGrid}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{userInfo.height} cm</Text>
+          <Text style={styles.cardDescription}>Height</Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{userInfo.weight} kg</Text>
+          <Text style={styles.cardDescription}>Weight</Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{userInfo.age} yo</Text>
+          <Text style={styles.cardDescription}>Age</Text>
+        </View>
       </View>
+
+      <TouchableOpacity
+        style={styles.aboutMeButton}
+        onPress={() => navigation.navigate("AboutModify")}
+      >
+        <View style={styles.aboutMeButtonInner}>
+          <Text style={styles.aboutMeButtonText}>About Me</Text>
+          <Image
+            source={require("../images/modifyIcon.png")}
+            style={styles.modifyIcon}
+          />
+        </View>
+      </TouchableOpacity>
+
+      {/* Logout Button */}
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={() => navigation.navigate("Login")}
+      >
+        <Text style={styles.logoutButtonText}>Logout</Text>
+      </TouchableOpacity>
+
       <View style={styles.menu}>
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Image
@@ -89,62 +148,97 @@ const ProfileScreen = () => {
   );
 };
 
-const ImageContainer = ({ image, height = "100%", width = "100%" }) => (
-  <View style={styles.imageContainer}>
-    <Image source={image} style={[{ height, width }]} />
-  </View>
-);
-
-const HeaderTitle = () => (
-  <View style={styles.title}>
-    <Text style={styles.bigTitle}>Hello Rabii!</Text>
-    <Text style={styles.smallTitle}>Thursday, 08 July</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "white", marginHorizontal: 6 },
-  title: {
+  headerImage: { width: "100%", height: "40%" },
+  nameText: {
+    fontSize: 24,
     fontWeight: "bold",
-    paddingHorizontal: "2%",
-    flex: 1,
+    textAlign: "center",
+    marginTop: 25,
+  },
+  dateText: {
+    fontSize: 18,
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 16,
+    color: "grey",
+  },
+  cardGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 16,
   },
-  bigTitle: {
-    fontSize: 13,
-    opacity: 0.9,
-    fontStyle: "italic",
-    fontWeight: "300",
-    paddingStart: "5%",
+  card: {
+    width: "30%",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 16,
+    margin: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  smallTitle: {
+  cardTitle: {
+    textAlign: "center",
     fontSize: 16,
     fontWeight: "bold",
-    paddingTop: "4%",
-    paddingStart: "5%",
+    marginBottom: 8,
+    color: "#05668D",
   },
-  header: {
-    paddingHorizontal: 5,
+  cardDescription: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "grey",
+  },
+  aboutMeButton: {
+    backgroundColor: "#D8EDF2",
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 16,
+    borderRadius: 100,
+  },
+  aboutMeButtonInner: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 22,
   },
-  screen: { margin: "3%" },
-  imageContainer: {
-    height: 60,
-    width: 60,
-    borderRadius: 50,
-    overflow: "hidden",
-    justifyContent: "center",
+  aboutMeButtonText: {
+    color: "black",
+    fontSize: 18,
+  },
+  modifyIcon: {
+    width: 21,
+    height: 21,
+  },
+  logoutButton: {
     alignItems: "center",
-    marginStart: "3%",
-    marginTop: "3%",
+    justifyContent: "center",
+    backgroundColor: "#05668D",
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 16,
+    borderRadius: 100,
+  },
+  logoutButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   menu: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: "white",
-    paddingBottom: "4%",
+    paddingBottom: "7%",
     paddingTop: "4%",
     position: "absolute",
     bottom: 0,

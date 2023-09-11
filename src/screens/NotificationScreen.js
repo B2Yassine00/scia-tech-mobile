@@ -10,35 +10,70 @@ import {
 import home from "../images/Home.png";
 import profil from "../images/Profil.png";
 import report from "../images/Report.png";
+import notificationsData from "../components/notifications.json";
+import NoNotif from "../images/NoNotif.png";
+import bell from "../images/bell.png";
 import { useNavigation } from "@react-navigation/native";
+import Header from "../components/header.js";
 
-const headerImage = require("../images/me.jpg");
 const logout = require("../images/logout.png");
 const notification = require("../images/Notification.png");
 
 const NotificationScreen = () => {
   const navigation = useNavigation();
   const [selectedIcon, setSelectedIcon] = useState("notification");
+  const [expandedCardIndex, setExpandedCardIndex] = useState(-1);
 
   const handleIconPress = (icon) => {
     setSelectedIcon(icon);
   };
 
-  const Header = () => (
-    <View style={styles.header}>
-      <ImageContainer image={headerImage} />
-      <HeaderTitle />
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <ImageContainer image={logout} height={"70%"} width={"70%"} />
-      </TouchableOpacity>
-    </View>
-  );
+  const toggleCardExpansion = (index) => {
+    if (expandedCardIndex === index) {
+      setExpandedCardIndex(-1);
+    } else {
+      setExpandedCardIndex(index);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screen}>
         <Header />
       </View>
+      <View>
+        {notificationsData.Notifications.length > 0 ? (
+          notificationsData.Notifications.map((Notification, index) => (
+            <View style={styles.cardContainer} key={index}>
+              <View style={styles.leftContainer}>
+                <Text style={styles.titleCard}>{Notification.title}</Text>
+                {expandedCardIndex === index ? (
+                  <Text style={styles.subtitle}>{Notification.subtitle}</Text>
+                ) : null}
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => toggleCardExpansion(index)}
+                >
+                  <Text style={styles.buttonText}>
+                    {expandedCardIndex === index ? "View Less" : "View More"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <Image source={bell} style={styles.image} />
+            </View>
+          ))
+        ) : (
+          <View style={styles.textContainer}>
+            <Image source={NoNotif} style={styles.imageNotif} />
+            <Text style={styles.headerText}>No Notifications</Text>
+            <Text style={styles.SubtitleText}>
+              You're all caught up! There are currently {"\n"} no new
+              notifications.
+            </Text>
+          </View>
+        )}
+      </View>
+
       <View style={styles.menu}>
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Image
@@ -89,62 +124,20 @@ const NotificationScreen = () => {
   );
 };
 
-const ImageContainer = ({ image, height = "100%", width = "100%" }) => (
-  <View style={styles.imageContainer}>
-    <Image source={image} style={[{ height, width }]} />
-  </View>
-);
-
-const HeaderTitle = () => (
-  <View style={styles.title}>
-    <Text style={styles.bigTitle}>Hello Rabii!</Text>
-    <Text style={styles.smallTitle}>Thursday, 08 July</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "white", marginHorizontal: 6 },
-  title: {
-    fontWeight: "bold",
-    paddingHorizontal: "2%",
-    flex: 1,
-    justifyContent: "center",
-  },
-  bigTitle: {
-    fontSize: 13,
-    opacity: 0.9,
-    fontStyle: "italic",
-    fontWeight: "300",
-    paddingStart: "5%",
-  },
-  smallTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    paddingTop: "4%",
-    paddingStart: "5%",
-  },
-  header: {
-    paddingHorizontal: 5,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  screen: { margin: "3%" },
-  imageContainer: {
-    height: 60,
-    width: 60,
-    borderRadius: 50,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-    marginStart: "3%",
-    marginTop: "3%",
+  screen: {
+    marginBottom: "1%",
+    marginTop: "2%",
+    marginRight: "2%",
+    marginLeft: "2%",
   },
   menu: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: "white",
-    paddingBottom: "4%",
+    paddingBottom: "7%",
     paddingTop: "4%",
     position: "absolute",
     bottom: 0,
@@ -159,6 +152,68 @@ const styles = StyleSheet.create({
   icon: {
     width: 30,
     height: 30,
+  },
+  cardContainer: {
+    marginTop: "4%",
+    flexDirection: "row",
+    backgroundColor: "#05668D",
+    borderRadius: 10,
+    shadowColor: "#05668D",
+    borderRadius: 30,
+    paddingTop: "1%",
+    marginRight: "3%",
+    marginLeft: "3%",
+    paddingRight: "2%",
+    paddingLeft: "2%",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.7,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  leftContainer: {
+    flex: 1,
+    padding: 15,
+  },
+  titleCard: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#E0EFF3",
+  },
+  subtitle: {
+    fontSize: 16,
+    marginTop: 7,
+    marginBottom: 3,
+    fontWeight: "bold",
+    fontWeight: "300",
+    color: "#E0EFF3",
+  },
+  button: {
+    backgroundColor: "#E0EFF3",
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingRight: 10,
+    paddingLeft: 10,
+    borderRadius: 50,
+    marginTop: 10,
+    width: "60%",
+    borderRadius: 50,
+  },
+  buttonText: {
+    color: "#000",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  image: {
+    width: 90,
+    height: 90,
+    marginTop: "6%",
+    marginBottom: "6%",
+    marginLeft: "4%",
+    resizeMode: "cover",
+    opacity: 0.95,
   },
 });
 

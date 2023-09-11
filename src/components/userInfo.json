@@ -1,0 +1,12 @@
+{
+  "UsersInfos": [
+    {
+      "id": 1,
+      "fullName": "Rabii Alaoui Lamharzi ",
+      "height": "184",
+      "weight": "85",
+      "age": "21",
+      "gender": "Male"
+    }
+  ]
+}

@@ -5,60 +5,111 @@ import {
   View,
   Image,
   Text,
-  Pressable,
-  Alert,
   Dimensions,
   TouchableOpacity,
+  Pressable,
+  Alert,
+  TextInput,
+  Button,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import sciatica from "../images/Standing.png";
+import sciaticaStanding from "../images/Standing.png";
+import sciaticaSitting from "../images/Sitting.png";
+import sciaticaHeavy from "../images/Heavy.png";
 import home from "../images/Home.png";
 import profil from "../images/Profil.png";
 import report from "../images/Report.png";
 import { useNavigation } from "@react-navigation/native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import data from "../components/painSciatica.json";
+import Header from "../components/header.js";
+import axios from "axios";
 
-const headerImage = require("../images/me.jpg");
 const logout = require("../images/logout.png");
 const notification = require("../images/Notification.png");
 const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(null);
   const [selectedIcon, setSelectedIcon] = useState("home");
+  const [painActivity, setPainActivity] = useState("");
 
   const handleIconPress = (icon) => {
     setSelectedIcon(icon);
   };
 
-  const showConfirmationAlert = () => {
+  const handleReportPainPress = () => {
     Alert.alert(
-      "Sciatica Pain",
-      "Have you experienced sciatica pain?",
+      "Report Sciatica Pain",
+      "Please select the activity that caused your pain:",
       [
         {
-          text: "Yes",
-          onPress: () => console.log("User selected Yes"),
-          style: "default",
+          text: "Sitting",
+          onPress: () => {
+            setPainActivity("Sitting");
+            showTimePicker();
+          },
         },
         {
-          text: "No",
-          onPress: () => console.log("User selected No"),
+          text: "Standing",
+          onPress: () => {
+            setPainActivity("Standing");
+            showTimePicker();
+          },
         },
-      ],
-      { cancelable: true }
+        {
+          text: "Heavy Activity",
+          onPress: () => {
+            setPainActivity("Heavy Activity");
+            showTimePicker();
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
     );
   };
 
-  const Header = () => (
-    <View style={styles.header}>
-      <ImageContainer image={headerImage} />
-      <HeaderTitle />
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <ImageContainer image={logout} height={"70%"} width={"70%"} />
-      </TouchableOpacity>
-    </View>
-  );
+  const showTimePicker = () => {
+    setTimePickerVisible(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisible(false);
+  };
+
+  const handleTimeConfirm = (time) => {
+    setSelectedTime(time);
+    console.log("User selected time:", time);
+
+    const formattedTime = `${time.getHours()}:${time.getMinutes()}`;
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getDate()}/${
+      currentDate.getMonth() + 1
+    }/${currentDate.getFullYear()}`;
+
+    // Send a request to your server
+    axios
+      .post("http://localhost:3000/report-pain", {
+        title: "Sciatica Pain",
+        activity: painActivity,
+        date: formattedDate,
+        time: formattedTime,
+      })
+      .then((response) => {
+        console.log(response.data.message);
+      })
+      .catch((error) => {
+        console.log("Error reporting pain:", error);
+      })
+      .finally(() => {
+        hideTimePicker();
+      });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -74,17 +125,24 @@ const HomeScreen = () => {
         </View>
         <Pressable
           style={[styles.registerButton]}
-          onPress={showConfirmationAlert}
+          onPress={handleReportPainPress}
         >
-          <Text style={styles.buttonText}>
-            REPORT SCIATICA PAIN{"   "}
-            <Text style={{ marginHorizontal: "2%" }}>
-              <Icon name="chevron-circle-right" size={windowWidth * 0.05} />
+          {({ pressed }) => (
+            <Text style={styles.buttonText}>
+              REPORT SCIATICA PAIN{"   "}
+              <Text style={{ marginHorizontal: "2%" }}>
+                <Icon name="chevron-circle-right" size={windowWidth * 0.05} />
+              </Text>
             </Text>
-          </Text>
+          )}
         </Pressable>
-        <Card />
-        <Card />
+
+        <DateTimePickerModal
+          isVisible={isTimePickerVisible}
+          mode="time"
+          onConfirm={handleTimeConfirm}
+          onCancel={hideTimePicker}
+        />
         <Card />
       </View>
       <View style={styles.menu}>
@@ -138,87 +196,64 @@ const HomeScreen = () => {
 };
 
 const Card = () => (
-  <View style={styles.contentContainer}>
-    <View style={styles.gridContainer}>
-      <Image source={sciatica} style={styles.image} />
-      <Text style={styles.centerText}>
-        Sciatica Pain {"\n"}
-        <Text
-          style={{
-            color: "grey",
-            fontWeight: "400",
-            fontSize: windowWidth * 0.04,
-          }}
-        >
-          Standing
-        </Text>
-      </Text>
-      <Text style={styles.endText}>
-        05/07/23{"\n"}
-        <Text
-          style={{
-            color: "black",
-            fontWeight: "400",
-            fontSize: windowWidth * 0.04,
-          }}
-        >
-          15:35
-        </Text>
-      </Text>
-    </View>
-  </View>
-);
+  <View>
+    {data.SciaticaPain.slice(-3)
+      .reverse()
+      .map((item, index) => {
+        let activityImage;
 
-const ImageContainer = ({ image, height = "100%", width = "100%" }) => (
-  <View style={styles.imageContainer}>
-    <Image source={image} style={[{ height, width }]} />
-  </View>
-);
+        switch (item.activity) {
+          case "Standing":
+            activityImage = sciaticaStanding;
+            break;
+          case "Sitting":
+            activityImage = sciaticaSitting;
+            break;
+          case "Heavy Activity":
+            activityImage = sciaticaHeavy;
+            break;
+          default:
+            activityImage = sciaticaSitting;
+        }
 
-const HeaderTitle = () => (
-  <View style={styles.title}>
-    <Text style={styles.bigTitle}>Hello Rabii!</Text>
-    <Text style={styles.smallTitle}>Thursday, 08 July</Text>
+        return (
+          <View style={styles.contentContainer} key={index}>
+            <View style={styles.gridContainer}>
+              <Image source={activityImage} style={styles.image} />
+              <Text style={styles.centerText}>
+                {item.title} {"\n"}
+                <Text
+                  style={{
+                    color: "grey",
+                    fontWeight: "400",
+                    fontSize: windowWidth * 0.04,
+                  }}
+                >
+                  {item.activity}
+                </Text>
+              </Text>
+              <Text style={styles.endText}>
+                {item.date} {"\n"}
+                <Text
+                  style={{
+                    color: "black",
+                    fontWeight: "400",
+                    fontSize: windowWidth * 0.04,
+                  }}
+                >
+                  {item.time}
+                </Text>
+              </Text>
+            </View>
+          </View>
+        );
+      })}
   </View>
 );
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "white", marginHorizontal: 6 },
-  title: {
-    fontWeight: "bold",
-    paddingHorizontal: "2%",
-    flex: 1,
-    justifyContent: "center",
-  },
-  bigTitle: {
-    fontSize: 13,
-    opacity: 0.9,
-    fontStyle: "italic",
-    fontWeight: "300",
-    paddingStart: "5%",
-  },
-  smallTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    paddingTop: "4%",
-    paddingStart: "5%",
-  },
-  header: {
-    paddingHorizontal: 5,
-    flexDirection: "row",
-    alignItems: "center",
-  },
   screen: { margin: "3%" },
-  imageContainer: {
-    height: 60,
-    width: 60,
-    borderRadius: 50,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-    marginStart: "3%",
-    marginTop: "3%",
-  },
   contentContainer: {
     marginTop: "3%",
     flexDirection: "row",
@@ -301,7 +336,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: "white",
-    paddingBottom: "4%",
+    paddingBottom: "7%",
     paddingTop: "4%",
     position: "absolute",
     bottom: 0,
