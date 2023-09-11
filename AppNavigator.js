@@ -5,7 +5,7 @@ import OnboardingScreen from "./src/screens/OnboardingScreen";
 import RegistrationScreen from "./src/screens/RegistrationScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import AboutMeScreen from "./src/screens/AboutMeScreen";
-import MedicalReportScreen from "./src/screens/MedicalReportScreen";
+import AboutMeModify from "./src/screens/AboutMeModify";
 import SucessRegistrationScreen from "./src/screens/SucessRegistrationScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
@@ -14,6 +14,7 @@ import NotificationScreen from "./src/screens/NotificationScreen";
 import ReportDailyScreen from "./src/screens/ReportDailyScreen";
 import ReportWeeklyScreen from "./src/screens/ReportWeeklyScreen";
 import ReportHistoryScreen from "./src/screens/ReportHistoryScreen";
+import IntroScreen from "./src/screens/IntroScreen";
 
 const Stack = createStackNavigator();
 
@@ -21,14 +22,15 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Onboarding"
+        initialRouteName="Intro"
         screenOptions={{ headerShown: false }}
       >
+        <Stack.Screen name="Intro" component={IntroScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Registration" component={RegistrationScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="About" component={AboutMeScreen} />
-        <Stack.Screen name="MedicalReport" component={MedicalReportScreen} />
+        <Stack.Screen name="AboutModify" component={AboutMeModify} />
         <Stack.Screen
           name="SucessRegistration"
           component={SucessRegistrationScreen}
