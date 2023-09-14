@@ -17,6 +17,8 @@ import dataJSON from "../components/HistoryReport.json";
 import pdf from "../images/pdf.png";
 import BackButton from "../components/backButton";
 import Header from "../components/header.js";
+import { printToFileAsync } from "expo-print";
+import { shareAsync } from "expo-sharing";
 
 const notification = require("../images/Notification.png");
 const logout = require("../images/logout.png");
@@ -27,6 +29,74 @@ const ReportHistoryScreen = () => {
   const [pdfFilePath, setPdfFilePath] = useState(null);
   const handleIconPress = (icon) => {
     setSelectedIcon(icon);
+  };
+
+  const html = `
+    <html>
+      <head>
+        <style>
+          .center {
+            text-align: center;
+          }
+          .title {
+            color: #05668D;
+          }
+          .bigger-image {
+            width: 200px; 
+            height: 200px;
+          }
+          .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 10px;
+          }
+          .titleContent {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="center">
+          <img src="file:///Users/pierre/Downloads/scia-tech-mobile-main/src/images/logo.png" alt="Image" class="bigger-image" />
+        </div>
+        <div class="center">
+          <h2 class="title">Scia-Tech</h1>
+        </div>
+        <div class="titleContent">
+          <h1>Report History</h1>
+        </div>
+        <div class="content">
+          <ul>
+            ${Object.keys(dataJSON.Weeks)
+              .map(
+                (week) => `
+              <li>
+                <strong>${week}</strong>
+                <ul>
+                  ${dataJSON.Weeks[week]
+                    .map((item) => `<li>${item.text}</li>`)
+                    .join("")}
+                </ul>
+              </li>`
+              )
+              .join("")}
+          </ul>
+        </div>
+      </body>
+    </html>
+  `;
+
+  let generatePdf = async () => {
+    const file = await printToFileAsync({
+      html: html,
+      base64: false,
+    });
+
+    await shareAsync(file.uri);
   };
 
   return (
@@ -91,7 +161,7 @@ const ReportHistoryScreen = () => {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.DownloadButton}>
+      <TouchableOpacity style={styles.DownloadButton} onPress={generatePdf}>
         <View style={styles.buttonContent}>
           <Text style={styles.DownloadButtonText}>Download</Text>
           <View style={styles.pdfImageContainer}>

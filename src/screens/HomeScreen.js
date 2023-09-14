@@ -86,7 +86,11 @@ const HomeScreen = () => {
     setSelectedTime(time);
     console.log("User selected time:", time);
 
-    const formattedTime = `${time.getHours()}:${time.getMinutes()}`;
+    const hours = time.getHours();
+    const formattedHours = hours === 0 ? "00" : String(hours).padStart(2, "0");
+    const formattedMinutes = String(time.getMinutes()).padStart(2, "0");
+    const formattedTime = `${formattedHours}:${formattedMinutes}`;
+
     const currentDate = new Date();
     const formattedDate = `${currentDate.getDate()}/${
       currentDate.getMonth() + 1
