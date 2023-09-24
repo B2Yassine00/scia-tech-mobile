@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity, Image, View, Text } from "react-native";
+import {
+  TouchableOpacity,
+  Image,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -11,6 +17,7 @@ const Header = () => {
   const logout = require("../images/logout.png");
 
   const [storedEmail, setStoredEmail] = useState("");
+  const [loading, setLoading] = useState(true); // Add loading state
 
   // Use AsyncStorage to load storedEmail when the component mounts
   useEffect(() => {
@@ -22,6 +29,8 @@ const Header = () => {
         }
       } catch (error) {
         console.error("Error loading storedEmail: ", error);
+      } finally {
+        setLoading(false); // Mark loading as complete
       }
     }
     loadStoredEmail();
@@ -45,37 +54,44 @@ const Header = () => {
     }
   }, [route.params]);
 
-  const email = storedEmail;
-
-  const ImageContainer = ({ image, height = "100%", width = "100%" }) => (
-    <View style={styles.imageContainer}>
-      <Image source={image} style={[{ height, width }]} />
-    </View>
-  );
-
-  const HeaderTitle = () => {
-    const currentDate = new Date();
-    const options = { weekday: "long", day: "numeric", month: "long" };
-    const formattedDate = currentDate.toLocaleDateString(undefined, options);
-
+  if (loading) {
+    // Display a loading indicator while email is being retrieved
     return (
-      <View style={styles.title}>
-        <Text style={styles.bigTitle}>{email}!</Text>
-        <Text style={styles.smallTitle}>{formattedDate}</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="small" color="#0000ff" />
       </View>
     );
-  };
+  }
 
   return (
     <View style={styles.header}>
       <ImageContainer
         image={headerImage}
-        style={{ borderRadius: 100, borderWidth: 1.5, borderColor: "black" }}
+        style={styles.imageContainer2} // Updated styling
       />
-      <HeaderTitle />
+      <HeaderTitle email={storedEmail} />
       <TouchableOpacity onPress={() => navigation.navigate("Login")}>
         <ImageContainer image={logout} height={"70%"} width={"70%"} />
       </TouchableOpacity>
+    </View>
+  );
+};
+
+const ImageContainer = ({ image, height = "100%", width = "100%", style }) => (
+  <View style={[styles.imageContainer, style]}>
+    <Image source={image} style={[{ height, width }]} />
+  </View>
+);
+
+const HeaderTitle = ({ email }) => {
+  const currentDate = new Date();
+  const options = { weekday: "long", day: "numeric", month: "long" };
+  const formattedDate = currentDate.toLocaleDateString(undefined, options);
+
+  return (
+    <View style={styles.title}>
+      <Text style={styles.bigTitle}>{email}!</Text>
+      <Text style={styles.smallTitle}>{formattedDate}</Text>
     </View>
   );
 };
@@ -127,6 +143,11 @@ const styles = {
     alignItems: "center",
     marginStart: "3%",
     marginTop: "3%",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 };
 

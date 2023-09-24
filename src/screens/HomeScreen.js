@@ -9,8 +9,6 @@ import {
   TouchableOpacity,
   Pressable,
   Alert,
-  TextInput,
-  Button,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import sciaticaStanding from "../images/Standing.png";
@@ -23,6 +21,7 @@ import { useNavigation } from "@react-navigation/native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import data from "../components/painSciatica.json";
 import Header from "../components/header.js";
+import CountdownTimer from "../components/countdown.js";
 import axios from "axios";
 
 const logout = require("../images/logout.png");
@@ -124,7 +123,7 @@ const HomeScreen = () => {
             <Text style={styles.ExpectedTitle}>
               EXPECTED {"\n"} SCIATICA PAIN IN:{" "}
             </Text>
-            <Text style={styles.PainTitle}>13:24:08</Text>
+            <CountdownTimer />
           </View>
         </View>
         <Pressable

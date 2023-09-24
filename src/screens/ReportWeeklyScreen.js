@@ -61,9 +61,6 @@ const ReportHistoryScreen = () => {
       </head>
       <body>
         <div class="center">
-          <img src="file:///Users/pierre/Downloads/scia-tech-mobile-main/src/images/logo.png" alt="Image" class="bigger-image" />
-        </div>
-        <div class="center">
           <h2 class="title">Scia-Tech</h1>
         </div>
         <div class="titleContent">

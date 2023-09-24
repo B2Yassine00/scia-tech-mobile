@@ -1,13 +1,13 @@
 {
     "Notifications": [
       {
-        "title": "You made a wrong move!",
-        "subtitle": "Careful! You leaned too far to the right! Careful! You leaned too far to the right! Careful! You leaned too far to the right! Careful! You leaned too far to the right! Careful! You leaned too far to the right! Careful! You leaned too far to the right! Careful! You leaned too far to the right! Careful! You leaned too far to the right!",
+        "title": "You are sitting for too long!",
+        "subtitle": "Extended sitting can lead to sciatica pain. Take breaks and stretch regularly for spinal health.",
         "buttonText": "View More"
       },
       {
         "title": "You lifted more than 120kg! ",
-        "subtitle": "You lifted 120kg! You might get sciatica pain! You lifted 120kg! You might get sciatica pain! You lifted 120kg! You might get sciatica pain! You lifted 120kg! You might get sciatica pain! You lifted 120kg! You might get sciatica pain!",
+        "subtitle": "Lifting more than 120kg can put significant strain on your back and muscles. Ensure proper technique and take precautions to prevent sciatica pain!",
         "buttonText": "View More"
       }
     ]
